@@ -112,10 +112,26 @@
             m_HighlightSet = Nothing
         End If
 
-        m_DocEvents = Nothing
-        m_InputEvents = Nothing
-        m_AddAttributeSetButtonDef = Nothing
-        m_FindAttributeInDialogButtonDef = Nothing
+        If Not m_DocEvents Is Nothing Then
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(m_DocEvents)
+            m_DocEvents = Nothing
+        End If
+
+        If Not m_InputEvents Is Nothing Then
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(m_InputEvents)
+            m_InputEvents = Nothing
+        End If
+
+        If Not m_AddAttributeSetButtonDef Is Nothing Then
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(m_AddAttributeSetButtonDef)
+            m_AddAttributeSetButtonDef = Nothing
+        End If
+
+        If Not m_FindAttributeInDialogButtonDef Is Nothing Then
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(m_FindAttributeInDialogButtonDef)
+            m_FindAttributeInDialogButtonDef = Nothing
+        End If
+
         Me.InventorDocument = Nothing
 
         System.GC.WaitForPendingFinalizers()
@@ -371,15 +387,22 @@
         End Try
     End Sub
 
-    Private Sub m_InputEvents_OnActivateCommand(CommandName As String, Context As Inventor.NameValueMap) Handles m_InputEvents.OnActivateCommand
-        ' Another command was started, so terminate this program.  The reason
-        ' this is being used instead of InteractionEvents is because I want to
-        ' use the more general NW arrow selection which has a wider filter range
+    ' Disable the contextual mini toolbar.  This is the toolbar that's displayed when you select an entity.
+    ' It's disabled by clearing it's contents just before it's displayed.
+    Private Sub m_InputEvents_OnContextualMiniToolbar(SelectedEntities As Inventor.ObjectsEnumerator, DisplayedCommands As Inventor.NameValueMap, AdditionalInfo As Inventor.NameValueMap) Handles m_InputEvents.OnContextualMiniToolbar
+        DisplayedCommands.Clear()
+    End Sub
+
+    Private Sub m_InputEvents_OnActivateOrTerminateCommand(CommandName As String, Context As Inventor.NameValueMap) Handles m_InputEvents.OnActivateCommand, m_InputEvents.OnTerminateCommand
+        ' Another command was started or one was terminated, so terminate this program.  
+        ' The reasonthis is being used instead of InteractionEvents is because I want 
+        ' to use the more general NW arrow selection which has a wider filter range
         ' and is controlled by the user using the selection options.  One issue is
         ' that I don't get notified is the Escape key is pressed while in the NW arrow
         ' command so I can't terminate based on that.
         If Not (CommandName.Contains("ViewCmd") Or CommandName.Contains("WindowCmd")) Then
             m_HighlightSet.Clear()
+            CleanUp()
             Me.Close()
         End If
     End Sub
@@ -913,12 +936,6 @@
         End Try
     End Sub
 
-
-    ' Disable the contextual mini toolbar.  This is the toolbar that's displayed when you select an entity.
-    ' It's disabled by clearing it's contents just before it's displayed.
-    'Private Sub m_InputEvents_OnContextualMiniToolbar(ByVal SelectedEntities As Inventor.ObjectsEnumerator, ByVal DisplayedCommands As Inventor.NameValueMap, ByVal AdditionalInfo As Inventor.NameValueMap)
-    '    DisplayedCommands.Clear()
-    'End Sub
 End Class
 
 

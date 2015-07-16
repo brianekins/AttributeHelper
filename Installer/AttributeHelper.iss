@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Attribute Helper"
-#define MyAppVerName "Attribute Helper 2.2"
+#define MyAppVerName "Attribute Helper 2.3"
 #define MyAppPublisher "Brian Ekins"
 #define MyAppURL "http://blogs.autodesk.com/modthemachine/"
 
