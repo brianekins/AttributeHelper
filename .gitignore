@@ -4,7 +4,8 @@
 bin/*
 obj/*
 Readme.txt
-Installer/Setup/*
+AttributeHelperSetup.exe
+AttributeHelperSetup.zip
 
 
 # Windows image file caches
