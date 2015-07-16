@@ -4,6 +4,7 @@
 bin/*
 obj/*
 Readme.txt
+Installer/Setup/*
 
 
 # Windows image file caches
