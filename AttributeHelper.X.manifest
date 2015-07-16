@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity name="AttributeHelper" version="1.0.0.0"></assemblyIdentity>
+  <clrClass clsid="{9c93ff52-e2fa-4ec4-8c4a-5747ad0bafef}" progid="AttributeHelper.StandardAddInServer" threadingModel="Both" name="AttributeHelper.AttributeHelper.StandardAddInServer" runtimeVersion=""></clrClass>
+  <file name="AttributeHelper.dll" hashalg="SHA1"></file>
+</assembly>
