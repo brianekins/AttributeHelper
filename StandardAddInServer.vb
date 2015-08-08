@@ -86,6 +86,9 @@ Namespace AttributeHelper
 
         Private Sub m_attributeButtonDef_OnExecute(ByVal Context As Inventor.NameValueMap) Handles m_attributeButtonDef.OnExecute
             If Not g_inventorApplication.ActiveEditDocument Is Nothing Then
+                ' Stop the currently running command.
+                g_inventorApplication.CommandManager.StopActiveCommand()
+
                 Dim m_dialog As AttributeHelperDialog
                 m_dialog = New AttributeHelperDialog
                 m_dialog.InventorDocument = g_inventorApplication.ActiveEditDocument

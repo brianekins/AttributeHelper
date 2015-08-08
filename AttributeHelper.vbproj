@@ -186,6 +186,8 @@
     <PreBuildEvent>
     </PreBuildEvent>
     <PostBuildEvent>call "%25VS110COMNTOOLS%25vsvars32"
-mt.exe -manifest "$(ProjectDir)AttributeHelper.X.manifest" -outputresource:"$(TargetPath)";#2</PostBuildEvent>
+mt.exe -manifest "$(ProjectDir)AttributeHelper.X.manifest" -outputresource:"$(TargetPath)";#2
+
+copy "$(ProjectDir)Autodesk.AttributeHelper.Inventor.addin" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

@@ -16,6 +16,7 @@
     Private WithEvents m_FindAttributeInDialogButtonDef As Inventor.ButtonDefinition
 
 
+
     Public Property InventorDocument() As Inventor.Document
         Get
             Return m_InventorDoc
@@ -395,13 +396,24 @@
 
     Private Sub m_InputEvents_OnActivateOrTerminateCommand(CommandName As String, Context As Inventor.NameValueMap) Handles m_InputEvents.OnActivateCommand, m_InputEvents.OnTerminateCommand
         ' Another command was started or one was terminated, so terminate this program.  
-        ' The reasonthis is being used instead of InteractionEvents is because I want 
+        ' The reason this is being used instead of InteractionEvents is because I want 
         ' to use the more general NW arrow selection which has a wider filter range
         ' and is controlled by the user using the selection options.  One issue is
-        ' that I don't get notified is the Escape key is pressed while in the NW arrow
+        ' that I don't get notified if the Escape key is pressed while in the NW arrow
         ' command so I can't terminate based on that.
         If Not (CommandName.Contains("ViewCmd") Or CommandName.Contains("WindowCmd")) Then
             m_HighlightSet.Clear()
+
+            ' Check to see if changes have been made.
+            If m_Entities.HasChanges Then
+                ' See if they want the changes saved.
+                If MsgBox("You are aborting the Attribute Helper command and have made changes to attribute data.  Do you want to save the changes?", MsgBoxStyle.YesNo + MsgBoxStyle.Question, "Save Attribute Changes") = MsgBoxResult.Yes Then
+                    For Each entity As MyEntity In m_Entities
+                        UpdateEntity(entity)
+                    Next
+                End If
+            End If
+
             CleanUp()
             Me.Close()
         End If
@@ -479,11 +491,11 @@
                 Case Inventor.ValueTypeEnum.kStringType
                     attrib.Value = AttributeValue
                 Case Inventor.ValueTypeEnum.kIntegerType
-                    Dim intValue As Short
+                    Dim intValue As Integer
                     Try
-                        intValue = CType(AttributeValue, Short)
+                        intValue = CType(AttributeValue, Integer)
                     Catch ex As Exception
-                        MsgBox("The value entered is not a valid Integer type.")
+                        MsgBox("The value entered is not a valid Integer type.  It must be in the range of -2147483647 to 2147483647.")
                         Return False
                     End Try
                     attrib.Value = intValue
@@ -540,11 +552,11 @@
             Case Inventor.ValueTypeEnum.kStringType
                 attrib = attribSet.Add(AttributeName, Inventor.ValueTypeEnum.kStringType, AttributeValue)
             Case Inventor.ValueTypeEnum.kIntegerType
-                Dim intValue As Short
+                Dim intValue As Integer
                 Try
-                    intValue = CType(AttributeValue, Short)
+                    intValue = CType(AttributeValue, Integer)
                 Catch ex As Exception
-                    MsgBox("The value entered is not a valid Integer type.")
+                    MsgBox("The value entered is not a valid Integer type.  It must be in the range of -2147483647 to 2147483647.")
                     Return False
                 End Try
 
