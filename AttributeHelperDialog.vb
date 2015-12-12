@@ -49,7 +49,7 @@
                 Dim invAttribSet As Inventor.AttributeSet
 
                 ' Check for any new attribute sets.
-                If attribSet.IsNew Then
+                If attribSet.IsNew And Not attribSet.IsDeleted Then
                     invAttribSet = Entity.Entity.AttributeSets.Add(attribSet.Name)
 
                     ' Add its attributes.
@@ -57,7 +57,10 @@
                         invAttribSet.Add(attrib.Name, attrib.AttributeType, attrib.Value)
                     Next
                 ElseIf attribSet.IsDeleted Then
-                    Entity.Entity.AttributeSets.Item(attribSet.Name).Delete()
+                    If Not attribSet.InventorAttributeSet Is Nothing Then
+                        attribSet.InventorAttributeSet.Delete()
+                    End If
+                    ' Entity.Entity.AttributeSets.Item(attribSet.Name).Delete()
                 ElseIf attribSet.IsEdited Then
                     invAttribSet = Entity.Entity.AttributeSets.item(attribSet.OriginalName)
 
@@ -246,7 +249,7 @@
             attSets = invEntity.AttributeSets
 
             For Each attSet As Inventor.AttributeSet In invEntity.AttributeSets
-                Dim currentAttSet As MyAttributeSet = currentEntity.AttributeSets.Add(attSet.Name)
+                Dim currentAttSet As MyAttributeSet = currentEntity.AttributeSets.Add(attSet.Name, attSet)
 
                 For Each attrib As Inventor.Attribute In attSet
                     currentAttSet.Add(attrib.Name, attrib.ValueType, attrib.Value)
@@ -264,7 +267,7 @@
             For Each attSet As Inventor.AttributeSet In detachedAttribSets
                 Dim currentEntity As MyEntity = m_Entities.Add(Nothing)
 
-                Dim currentAttSet As MyAttributeSet = currentEntity.AttributeSets.Add(attSet.Name)
+                Dim currentAttSet As MyAttributeSet = currentEntity.AttributeSets.Add(attSet.Name, attSet)
                 For Each attrib As Inventor.Attribute In attSet
                     Call currentAttSet.Add(attrib.Name, attrib.Type, attrib.Value)
                 Next
@@ -425,13 +428,23 @@
             ' Determine context.
             Select Case treeView.SelectedNode.ImageIndex
                 Case 3, 4  ' Entity node
-                    ctxMenu.Items(0).Visible = True
-                    ctxMenu.Items(1).Visible = True
-                    ctxMenu.Items(2).Visible = False
-                    ctxMenu.Items(3).Visible = False
-                    ctxMenu.Items(4).Visible = False
-                    ctxMenu.Items(5).Visible = False
-                    ctxMenu.Items(6).Visible = False
+                    If treeView.SelectedNode.Text = "Nothing" Then
+                        ctxMenu.Items(0).Visible = False
+                        ctxMenu.Items(1).Visible = True
+                        ctxMenu.Items(2).Visible = False
+                        ctxMenu.Items(3).Visible = False
+                        ctxMenu.Items(4).Visible = False
+                        ctxMenu.Items(5).Visible = False
+                        ctxMenu.Items(6).Visible = False
+                    Else
+                        ctxMenu.Items(0).Visible = True
+                        ctxMenu.Items(1).Visible = True
+                        ctxMenu.Items(2).Visible = False
+                        ctxMenu.Items(3).Visible = False
+                        ctxMenu.Items(4).Visible = False
+                        ctxMenu.Items(5).Visible = False
+                        ctxMenu.Items(6).Visible = False
+                    End If
 
                     e.Cancel = False
                 Case 0, 1  ' AttributeSet node
@@ -948,6 +961,19 @@
         End Try
     End Sub
 
+    Private Sub btnHelp_Click(sender As Object, e As EventArgs) Handles btnHelp.Click
+        Dim helpFile As String = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase)
+        If helpFile.StartsWith("file:\") Then
+            helpFile = helpFile.Substring("file:\".Length)
+        End If
+        helpFile = helpFile & "\AttributeHelperReadMe.pdf"
+
+        If System.IO.File.Exists(helpFile) Then
+            Process.Start(helpFile)
+        Else
+            MsgBox("Problem locating help file.")
+        End If
+    End Sub
 End Class
 
 
@@ -1127,7 +1153,7 @@ Friend Class MyAttributeSets
         End Set
     End Property
 
-    Public Function Add(ByVal Name As String) As MyAttributeSet
+    Public Function Add(ByVal Name As String, Optional InventorAttributeSet As Inventor.AttributeSet = Nothing) As MyAttributeSet
         Try
             ' Create a new object
             Dim newMember As MyAttributeSet
@@ -1136,6 +1162,7 @@ Friend Class MyAttributeSets
 
             ' Set the properties passed into the method
             newMember.Name = Name
+            newMember.InventorAttributeSet = InventorAttributeSet
 
             newMember.IsNew = True
 
@@ -1196,6 +1223,7 @@ Friend Class MyAttributeSet
     Private m_isEdited As Boolean = False
     Private m_Deleted As Boolean = False
     Private m_New As Boolean = False
+    Private m_inventorAttributeSet As Inventor.AttributeSet = Nothing
 
     Public Property IsNew() As Boolean
         Get
@@ -1219,6 +1247,7 @@ Friend Class MyAttributeSet
         End Set
     End Property
 
+    ' Adds a new attribute to the set.
     Public Function Add(ByVal Name As String, ByVal AttribType As Inventor.ValueTypeEnum, ByVal Value As Object) As MyAttribute
         Try
             ' Create a new object
@@ -1312,6 +1341,15 @@ Friend Class MyAttributeSet
         End Get
         Set(ByVal value As TreeNode)
             m_Node = value
+        End Set
+    End Property
+
+    Public Property InventorAttributeSet() As Inventor.AttributeSet
+        Get
+            Return m_inventorAttributeSet
+        End Get
+        Set(value As Inventor.AttributeSet)
+            m_inventorAttributeSet = value
         End Set
     End Property
 End Class
